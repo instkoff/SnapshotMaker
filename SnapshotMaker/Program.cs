@@ -53,7 +53,8 @@ namespace SnapshotMaker
                     {
                         services.Configure<AppSettings>(hostContext.Configuration.GetSection(nameof(AppSettings)));
                         services.AddHostedService<ConsoleApplication>()
-                                .AddScoped<IMakeSnapshotService, MakeSnapshotService>();
+                                .AddScoped<IMakeSnapshotService, MakeSnapshotService>()
+                                .AddScoped<IFrameProcessorService, FrameProcessorService>();
                     }
                 )
                 //Добавляем логгирование, в данном случае Serilog

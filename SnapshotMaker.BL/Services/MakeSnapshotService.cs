@@ -1,14 +1,9 @@
 ﻿using System;
-using System.Collections;
-using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System.Diagnostics;
-using System.IO;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Emgu.CV;
-using Emgu.CV.CvEnum;
-using Emgu.CV.Structure;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using SnapshotMaker.BL.Interfaces;
@@ -20,76 +15,27 @@ namespace SnapshotMaker.BL.Services
     {
         private readonly ILogger<MakeSnapshotService> _logger;
         private readonly IOptions<AppSettings> _appSettings;
-        private Queue _frameQueue;
+        private readonly IFrameProcessorService _frameProcessor;
+        private ConcurrentQueue<Mat> _frameQueue;
         private VideoCapture _capture;
-        private Mat _inputFrame;
         private bool _streamOpened;
+        private Timer _timer;
+        private Stopwatch _stopwatch;
 
-        public MakeSnapshotService(ILogger<MakeSnapshotService> logger, IOptions<AppSettings> appSettings)
+        public MakeSnapshotService(ILogger<MakeSnapshotService> logger, IOptions<AppSettings> appSettings, IFrameProcessorService frameProcessor)
         {
             _logger = logger;
             _appSettings = appSettings;
+            _frameProcessor = frameProcessor;
         }
 
         public async void StartCaptureAsync()
         {
-            var lastTimeSnapshotSaved = Environment.TickCount - _appSettings.Value.SnapshotDelay;
-            var stopwatch = new Stopwatch();
-            _inputFrame = new Mat();
-            var q = new Queue();
-            _frameQueue = Queue.Synchronized(q);
+            _frameQueue = new ConcurrentQueue<Mat>();
             try
             {
-                if (!_streamOpened)
-                {
-                    _logger.LogInformation("Opening camera stream...");
-                    var openTask = Task.Run(() => _capture = new VideoCapture(_appSettings.Value.VideoSource));
-                    if (await Task.WhenAny(openTask, Task.Delay(20000)) != openTask)
-                    {
-                        _logger.LogWarning("Unable to open camera stream");
-                    }
-                    else
-                    {
-                        _logger.LogInformation("Camera stream opened");
-                        _streamOpened = true;
-                    }
-                }
-                if (_streamOpened)
-                {
-                    if (_appSettings.Value.Interval > 0)
-                    {
-                        stopwatch.Start();
-                    }
-                    while (_streamOpened)
-                    {
-                        var captureTask = Task.Run(() => _inputFrame = _capture.QueryFrame());
-                        if (await Task.WhenAny(captureTask, Task.Delay(5000)) != captureTask)
-                        {
-                            _logger.LogWarning("Camera connection lost");
-                            _streamOpened = false;
-                        }
-                        else
-                        {
-                            var ticksNow = Environment.TickCount;
-                            if (Math.Abs(ticksNow - lastTimeSnapshotSaved) < _appSettings.Value.SnapshotDelay)
-                                continue;
-                            lastTimeSnapshotSaved = ticksNow;
-                            if (_inputFrame != null && !_inputFrame.IsEmpty)
-                            {
-                                _frameQueue.Enqueue(_inputFrame.Clone());
-                            }
-                            ProcessFrame();
-                            if (stopwatch.ElapsedMilliseconds >= _appSettings.Value.Interval)
-                            {
-                                _capture.Stop();
-                                _capture.Dispose();
-                                _streamOpened = false;
-                                _logger.LogInformation("Stream stopped.");
-                            }
-                        }
-                    }
-
-                }
+                await OpenStream();
+                SetTimerCapturing();
             }
             catch (Exception ex)
             {
@@ -98,16 +44,65 @@ namespace SnapshotMaker.BL.Services
             }
         }
 
-        private void ProcessFrame()
+        private async Task OpenStream()
         {
-            var frame = (Mat)_frameQueue.Dequeue();
-            var cvImage = frame.ToImage<Bgr, byte>();
-            var jpegImageBytes = cvImage.ToJpegData(100);
-            var snapshotName = DateTime.Now.ToString("s").Replace(":", "_") + ".jpg";
-            var path = Path.Combine(_appSettings.Value.OutputFolder, snapshotName);
-            using var stream = File.OpenWrite(path);
-            stream.Write(jpegImageBytes, 0, jpegImageBytes.Length);
-            _logger.LogInformation($"{snapshotName} saved in {_appSettings.Value.OutputFolder}");
+            if (!_streamOpened)
+            {
+                _logger.LogInformation("Opening camera stream...");
+                var openTask = Task.Run(() => _capture = new VideoCapture(_appSettings.Value.VideoSource));
+                if (await Task.WhenAny(openTask, Task.Delay(20000)) != openTask)
+                {
+                    _logger.LogWarning("Unable to open camera stream");
+                }
+                else
+                {
+                    _stopwatch = new Stopwatch();
+                    if (_appSettings.Value.Interval > 0)
+                    {
+                        _stopwatch.Start();
+                    }
+
+                    _logger.LogInformation("Camera stream opened");
+                    _streamOpened = true;
+                }
+            }
+        }
+
+        private async void CaptureFrame(object state)
+        {
+            if (!_streamOpened || _capture == null) return;
+            var inputFrame = new Mat();
+            var captureTask = Task.Run(() => inputFrame = _capture.QueryFrame());
+            if (await Task.WhenAny(captureTask, Task.Delay(5000)) != captureTask)
+            {
+                _logger.LogWarning("Camera connection lost");
+                _streamOpened = false;
+            }
+            else
+            {
+                if (inputFrame != null && !inputFrame.IsEmpty)
+                {
+                    _frameQueue.Enqueue(inputFrame.Clone());
+                    var result = await Task.Run(() => _frameProcessor.ProcessFrame(_frameQueue, _appSettings.Value.OutputFolder));
+                    if (result)
+                        _logger.LogInformation($"Snapshot saved in {_appSettings.Value.OutputFolder}");
+                    inputFrame.Dispose();
+                }
+
+                if (_stopwatch.ElapsedMilliseconds >= _appSettings.Value.Interval)
+                {
+                    _capture.Stop();
+                    _capture.Dispose();
+                    _streamOpened = false;
+                    _timer.Dispose();
+                    _logger.LogInformation("Stream stopped.");
+                }
+            }
+        }
+
+        private void SetTimerCapturing()
+        {
+            _timer = new Timer(CaptureFrame, null, 0, _appSettings.Value.SnapshotDelay);
         }
     }
 }

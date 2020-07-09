@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30225.117
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SnapshotMaker", "SnapshotMaker\SnapshotMaker.csproj", "{63929274-D089-4491-B0B5-1C4B5C94CB2E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SnapshotMaker.BL", "SnapshotMaker.BL\SnapshotMaker.BL.csproj", "{3102A368-D3A8-4BFC-9165-3CB99D4A3565}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{63929274-D089-4491-B0B5-1C4B5C94CB2E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{63929274-D089-4491-B0B5-1C4B5C94CB2E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{63929274-D089-4491-B0B5-1C4B5C94CB2E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{63929274-D089-4491-B0B5-1C4B5C94CB2E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3102A368-D3A8-4BFC-9165-3CB99D4A3565}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3102A368-D3A8-4BFC-9165-3CB99D4A3565}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3102A368-D3A8-4BFC-9165-3CB99D4A3565}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3102A368-D3A8-4BFC-9165-3CB99D4A3565}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {853255C3-3B0C-4968-9605-855CF7D3698C}
+	EndGlobalSection
+EndGlobal

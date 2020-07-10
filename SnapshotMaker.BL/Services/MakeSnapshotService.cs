@@ -15,18 +15,18 @@ namespace SnapshotMaker.BL.Services
     {
         private readonly ILogger<MakeSnapshotService> _logger;
         private readonly IOptions<AppSettings> _appSettings;
-        private readonly IFrameProcessorService _frameProcessor;
         private ConcurrentQueue<Mat> _frameQueue;
         private VideoCapture _capture;
         private bool _streamOpened;
         private Timer _timer;
         private Stopwatch _stopwatch;
 
-        public MakeSnapshotService(ILogger<MakeSnapshotService> logger, IOptions<AppSettings> appSettings, IFrameProcessorService frameProcessor)
+        public event Action<ConcurrentQueue<Mat>, string> onFrameAdded;
+
+        public MakeSnapshotService(ILogger<MakeSnapshotService> logger, IOptions<AppSettings> appSettings)
         {
             _logger = logger;
             _appSettings = appSettings;
-            _frameProcessor = frameProcessor;
         }
 
         public async void StartCaptureAsync()
@@ -83,10 +83,8 @@ namespace SnapshotMaker.BL.Services
                 if (inputFrame != null && !inputFrame.IsEmpty)
                 {
                     _frameQueue.Enqueue(inputFrame.Clone());
-                    var result = await Task.Run(() => _frameProcessor.ProcessFrame(_frameQueue, _appSettings.Value.OutputFolder));
-                    if (result)
-                        _logger.LogInformation($"Snapshot saved in {_appSettings.Value.OutputFolder}");
                     inputFrame.Dispose();
+                    onFrameAdded?.Invoke(_frameQueue, _appSettings.Value.OutputFolder);
                 }
 
                 if (_stopwatch.ElapsedMilliseconds >= _appSettings.Value.Interval)

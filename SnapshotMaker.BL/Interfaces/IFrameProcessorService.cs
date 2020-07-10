@@ -5,6 +5,6 @@ namespace SnapshotMaker.BL.Services
 {
     public interface IFrameProcessorService
     {
-        bool ProcessFrame(ConcurrentQueue<Mat> frameQueue, string outputFolder);
+        void StartProcessing();
     }
 }

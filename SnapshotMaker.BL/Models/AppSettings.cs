@@ -10,7 +10,7 @@ namespace SnapshotMaker.BL.Models
         public string OutputFolder { get; set; }
         [Option('d', "start-delay", Required = false, HelpText = "Set the delay before stream start capturing")]
         public long StartDelay { get; set; }
-        [Option('i', "interval", Required = false, HelpText = "Set the capturing time in ms")]
+        [Option('i', "interval", Required = true, HelpText = "Set the capturing time in ms")]
         public long Interval { get; set; }
         [Option('p', "snapshot-delay", Default = 1000, Required = true, HelpText = "Set pause between snapshots")]
         public long SnapshotDelay { get; set; }

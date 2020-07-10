@@ -2,9 +2,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Options;
 using SnapshotMaker.BL.Interfaces;
-using SnapshotMaker.BL.Models;
 using SnapshotMaker.BL.Services;
 
 namespace SnapshotMaker

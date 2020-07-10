@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using Emgu.CV;
+using Emgu.CV.CvEnum;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using SnapshotMaker.BL.Interfaces;
@@ -20,6 +21,8 @@ namespace SnapshotMaker.BL.Services
         private bool _streamOpened;
         private Timer _timer;
         private Stopwatch _stopwatch;
+        private int _frameCount;
+        private long _elapsedTime;
 
         public event Action<ConcurrentQueue<Mat>, string> onFrameAdded;
 
@@ -27,6 +30,7 @@ namespace SnapshotMaker.BL.Services
         {
             _logger = logger;
             _appSettings = appSettings;
+            _elapsedTime = _appSettings.Value.StartDelay;
         }
 
         public async void StartCaptureAsync()
@@ -48,11 +52,11 @@ namespace SnapshotMaker.BL.Services
         {
             if (!_streamOpened)
             {
-                _logger.LogInformation("Opening camera stream...");
+                _logger.LogInformation("Try opening stream...");
                 var openTask = Task.Run(() => _capture = new VideoCapture(_appSettings.Value.VideoSource));
                 if (await Task.WhenAny(openTask, Task.Delay(20000)) != openTask)
                 {
-                    _logger.LogWarning("Unable to open camera stream");
+                    _logger.LogWarning("Unable to open stream");
                 }
                 else
                 {
@@ -62,7 +66,7 @@ namespace SnapshotMaker.BL.Services
                         _stopwatch.Start();
                     }
 
-                    _logger.LogInformation("Camera stream opened");
+                    _logger.LogInformation("Stream opened");
                     _streamOpened = true;
                 }
             }
@@ -72,10 +76,11 @@ namespace SnapshotMaker.BL.Services
         {
             if (!_streamOpened || _capture == null) return;
             var inputFrame = new Mat();
+            _capture.SetCaptureProperty(CapProp.PosMsec, _elapsedTime);
             var captureTask = Task.Run(() => inputFrame = _capture.QueryFrame());
             if (await Task.WhenAny(captureTask, Task.Delay(5000)) != captureTask)
             {
-                _logger.LogWarning("Camera connection lost");
+                _logger.LogWarning("Stream connection lost");
                 _streamOpened = false;
             }
             else
@@ -83,8 +88,15 @@ namespace SnapshotMaker.BL.Services
                 if (inputFrame != null && !inputFrame.IsEmpty)
                 {
                     _frameQueue.Enqueue(inputFrame.Clone());
-                    inputFrame.Dispose();
+                    _frameCount++;
+                    _elapsedTime += _appSettings.Value.SnapshotDelay;
                     onFrameAdded?.Invoke(_frameQueue, _appSettings.Value.OutputFolder);
+                    if (_frameCount == 10)
+                    {
+                        GC.Collect();
+                        _frameCount = 0;
+                    }
+
                 }
 
                 if (_stopwatch.ElapsedMilliseconds >= _appSettings.Value.Interval)

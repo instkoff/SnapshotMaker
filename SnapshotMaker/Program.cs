@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using CommandLine;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Configuration.Memory;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Serilog;
@@ -40,7 +38,12 @@ namespace SnapshotMaker
                     if (args.Any())
                     {
                         Parser.Default.ParseArguments<AppSettings>(args)
-                            .WithParsed(parsedSettings => builder.AddParsedCmdLineConfiguration(parsedSettings));
+                            .WithParsed(parsedSettings => builder.AddParsedCmdLineConfiguration(parsedSettings))
+                            .WithNotParsed((errors)=>
+                            {
+                                Console.WriteLine(string.Join("\n", errors));
+                                throw new ArgumentException(string.Join("\n", errors));
+                            });
                     }
                     else
                     {

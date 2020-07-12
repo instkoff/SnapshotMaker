@@ -1,28 +1,30 @@
 ﻿using System;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using SnapshotMaker.BL.Interfaces;
-using SnapshotMaker.BL.Services;
+using SnapshotMaker.BL.Models;
 
 namespace SnapshotMaker
 {
     public class ConsoleApplication : IHostedService
     {
-        private readonly IMakeSnapshotService _makeSnapshotService;
-        private readonly IFrameProcessorService _frameProcessorService;
+        private readonly ITakeSnapshotService _takeSnapshotService;
+        private readonly IOptions<AppSettings> _options;
 
         //Пробрасываем нужные зависимости
-        public ConsoleApplication(IMakeSnapshotService makeSnapshotService, IFrameProcessorService frameProcessorService)
+        public ConsoleApplication(ITakeSnapshotService takeSnapshotService, IOptions<AppSettings> options)
         {
-            _makeSnapshotService = makeSnapshotService;
-            _frameProcessorService = frameProcessorService;
+            _takeSnapshotService = takeSnapshotService;
+            _options = options;
         }
         //Стартуем хост
         public Task StartAsync(CancellationToken cancellationToken)
         {
-            _makeSnapshotService.StartCaptureAsync();
-            _frameProcessorService.StartProcessing();
+            _takeSnapshotService.StartTakeSnapshots();
             Console.ReadKey();
             return Task.CompletedTask;
         }

@@ -17,14 +17,14 @@ namespace SnapshotMaker.BL.Services
 {
     public class FrameProcessorService : IFrameProcessorService
     {
-        private readonly IMakeSnapshotService _makeSnapshotService;
+        private readonly FrameCapturerModel _frameCapturer;
         private readonly ILogger<FrameProcessorService> _logger;
         private List<RoiWrapper> _roiWrappers;
         private Queue<CvImageWrapper> _imageParts;
 
-        public FrameProcessorService(IMakeSnapshotService makeSnapshotService, ILogger<FrameProcessorService> logger)
+        public FrameProcessorService(FrameCapturerModel frameCapturer, ILogger<FrameProcessorService> logger)
         {
-            _makeSnapshotService = makeSnapshotService;
+            _frameCapturer = frameCapturer;
             _logger = logger;
             _roiWrappers = new List<RoiWrapper>();
             _imageParts = new Queue<CvImageWrapper>();
@@ -38,7 +38,7 @@ namespace SnapshotMaker.BL.Services
             _roiWrappers.Add(new RoiWrapper(topBullion, "Top"));
             _roiWrappers.Add(new RoiWrapper(middleBullion, "Middle"));
             _roiWrappers.Add(new RoiWrapper(bottomBullion, "Bottom"));
-            _makeSnapshotService.onFrameAdded += (frameQueue, outputFolder) =>
+            _frameCapturer.OnFrameAdded += (frameQueue, outputFolder) =>
             {
                 Task.Run(() => ProcessFrame(frameQueue, outputFolder));
             };

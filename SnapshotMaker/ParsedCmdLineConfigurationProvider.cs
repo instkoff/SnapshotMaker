@@ -1,8 +1,6 @@
-﻿using System.Collections.Generic;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Primitives;
+﻿using Microsoft.Extensions.Configuration;
 
-namespace SnapshotMaker.BL.Models
+namespace SnapshotMaker
 {
     public class ParsedCmdLineConfigurationProvider : ConfigurationProvider
     {

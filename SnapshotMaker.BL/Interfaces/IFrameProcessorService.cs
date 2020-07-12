@@ -1,7 +1,4 @@
-﻿using System.Collections.Concurrent;
-using Emgu.CV;
-
-namespace SnapshotMaker.BL.Services
+﻿namespace SnapshotMaker.BL.Interfaces
 {
     public interface IFrameProcessorService
     {

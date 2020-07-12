@@ -1,9 +1,12 @@
 ﻿using System;
 using System.Linq;
+using System.Text.RegularExpressions;
 using CommandLine;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Serilog;
 using SnapshotMaker.BL.Interfaces;
 using SnapshotMaker.BL.Models;
@@ -18,7 +21,8 @@ namespace SnapshotMaker
             //Пытаемся стартануть узел
             try
             {
-                Log.Information("Programm start..."); CreateHostBuilder(args).RunConsoleAsync();
+                Log.Information("Programm start..."); 
+                CreateHostBuilder(args).RunConsoleAsync();
             }
             catch (Exception e)
             {
@@ -56,8 +60,8 @@ namespace SnapshotMaker
                     {
                         services.Configure<AppSettings>(hostContext.Configuration.GetSection(nameof(AppSettings)));
                         services.AddHostedService<ConsoleApplication>()
-                                .AddScoped<IMakeSnapshotService, MakeSnapshotService>()
-                                .AddScoped<IFrameProcessorService, FrameProcessorService>();
+                            .AddScoped(x => SelectCapturerModel(hostContext.Configuration, x))
+                            .AddScoped<ITakeSnapshotService, TakeSnapshotsService>();
                     }
                 )
                 //Добавляем логгирование, в данном случае Serilog
@@ -69,5 +73,26 @@ namespace SnapshotMaker
 
                     logging.AddSerilog();
                 });
+
+        private static FrameCapturerModel SelectCapturerModel(IConfiguration configuration, IServiceProvider serviceProvider)
+        {
+            var source = configuration.GetSection(nameof(AppSettings)).GetValue<string>("VideoSource");
+            const string filePathPattern = @"^(([a-zA-Z]{1}:|\\)(\\[^\\/<>:\|\*\?\""]+)+\.[^\\/<>:\|]{3,4})$";
+            const string rtspUrlPattern = @"^(rtsp?:\/\/)?([\da-z\.-]+\.[a-z\.]{2,6}|[\d\.]+)([\/:?=&#]{1}[\da-z\.-]+)*[\/\?]?$";
+
+            if (Regex.IsMatch(source, filePathPattern, RegexOptions.IgnoreCase))
+            {
+                return new FrameCapturerFromFile();
+            }
+            else if (Regex.IsMatch(source, rtspUrlPattern, RegexOptions.IgnoreCase))
+            {
+                return new FrameCapturerFromCamera(serviceProvider.GetRequiredService<ILogger<FrameCapturerFromCamera>>(),
+                    serviceProvider.GetRequiredService<IOptions<AppSettings>>());
+            }
+            else
+            {
+                throw new ArgumentException("Не могу определить ресурс", source);
+            }
+        }
     }
 }

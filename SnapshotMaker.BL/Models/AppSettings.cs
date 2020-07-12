@@ -8,11 +8,11 @@ namespace SnapshotMaker.BL.Models
         public string VideoSource { get; set; }
         [Option('o', "output-folder", Required = true, HelpText = "Set output folder")]
         public string OutputFolder { get; set; }
-        [Option('d', "start-delay", Required = false, HelpText = "Set the delay before stream start capturing")]
-        public long StartDelay { get; set; }
-        [Option('i', "interval", Required = true, HelpText = "Set the capturing time in ms")]
+        [Option('p', "start-pause", Required = false, HelpText = "Set pause in ms before stream start capturing")]
+        public long StartPause { get; set; }
+        [Option('d', "duration", Required = true, HelpText = "Set capturing time in ms")]
         public long Interval { get; set; }
-        [Option('p', "snapshot-delay", Default = 1000, Required = true, HelpText = "Set pause between snapshots")]
+        [Option('w', "wait", Default = 1000, Required = true, HelpText = "Set wait time in ms until the next snapshot")]
         public long SnapshotDelay { get; set; }
 
     }

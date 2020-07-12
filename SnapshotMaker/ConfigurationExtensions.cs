@@ -1,8 +1,8 @@
 ﻿using System;
-using System.Threading;
 using Microsoft.Extensions.Configuration;
+using SnapshotMaker.BL.Models;
 
-namespace SnapshotMaker.BL.Models
+namespace SnapshotMaker
 {
     public static class ConfigurationExtensions
     {

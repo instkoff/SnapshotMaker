@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Collections.Generic;
 using Emgu.CV;
 using Emgu.CV.Structure;
 using Emgu.CV.Util;

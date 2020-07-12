@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Configuration;
+using SnapshotMaker.BL.Models;
 
-namespace SnapshotMaker.BL.Models
+namespace SnapshotMaker
 {
     public class AppSettingConfigurationSource : IConfigurationSource
     {
@@ -14,7 +15,7 @@ namespace SnapshotMaker.BL.Models
         {
             VideoSource = settings.VideoSource;
             OutputFolder = settings.OutputFolder;
-            StartDelay = settings.StartDelay;
+            StartDelay = settings.StartPause;
             Interval = settings.Interval;
             SnapshotDelay = settings.SnapshotDelay;
         }

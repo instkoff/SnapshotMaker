@@ -19,8 +19,10 @@ namespace SnapshotMaker
             }
             else
             {
-                if(File.Exists(appSettings.VideoSource))
+                if (File.Exists(appSettings.VideoSource))
+                {
                     services.AddScoped<FrameCapturerModel, FrameCapturerFromFile>();
+                }
                 else
                 {
                     Log.Error("Can't determine the resource type.");

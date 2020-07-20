@@ -47,19 +47,12 @@ namespace SnapshotMaker.BL.Services
 
         private bool DetectMovement(Mat frame)
         {
-            if (_prevImage != null)
-            {
-                using var currentImage = frame.ToImage<Bgr, byte>();
-                using var diffFrame = currentImage.AbsDiff(_prevImage);
-                var moves = diffFrame.CountNonzero()[0];
-                if (moves > 4400000)
-                {
-                    _prevImage = frame.ToImage<Bgr, byte>();
-                    return true;
-                }
-            }
+            _prevImage ??= frame.ToImage<Bgr, byte>();
+            using var currentImage = frame.ToImage<Bgr, byte>();
+            using var diffFrame = currentImage.AbsDiff(_prevImage);
+            var moves = diffFrame.CountNonzero()[0];
             _prevImage = frame.ToImage<Bgr, byte>();
-            return false;
+            return moves > 4400000;
         }
 
 

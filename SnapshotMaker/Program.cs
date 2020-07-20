@@ -49,7 +49,7 @@ namespace SnapshotMaker
                     }
                     else
                     {
-                        builder.AddJsonFile("appsettings.json",optional: true);
+                        builder.AddJsonFile("appsettings.json", optional: true);
                     }
                     builder.AddJsonFile("logger_config.json", false);
                 })

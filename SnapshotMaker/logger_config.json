@@ -17,7 +17,7 @@
               "Name": "File",
               "Args": {
                 "restrictedToMinimumLevel": "Warning",
-                "path": "Logs\\log.txt",
+                "path": "Logs/log.txt",
                 "rollingInterval": "Day",
                 "fileSizeLimitBytes": 10240,
                 "rollOnFileSizeLimit": true,

@@ -2,7 +2,7 @@
 using Microsoft.Extensions.Configuration;
 using SnapshotMaker.BL.Models;
 
-namespace SnapshotMaker
+namespace SnapshotMaker.Configuration
 {
     public static class ConfigurationExtensions
     {

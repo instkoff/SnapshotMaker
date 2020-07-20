@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.Configuration;
 
-namespace SnapshotMaker
+namespace SnapshotMaker.Configuration
 {
     public class ParsedCmdLineConfigurationProvider : ConfigurationProvider
     {
@@ -14,10 +14,12 @@ namespace SnapshotMaker
         public override void Load()
         {
             Set($"AppSettings:{nameof(Source.VideoSource)}", Source.VideoSource);
-            Set($"AppSettings:{nameof(Source.Interval)}", Source.Interval.ToString());
-            Set($"AppSettings:{nameof(Source.StartDelay)}", Source.StartDelay.ToString());
+            Set($"AppSettings:{nameof(Source.Duration)}", Source.Duration.ToString());
+            Set($"AppSettings:{nameof(Source.StartPause)}", Source.StartPause.ToString());
             Set($"AppSettings:{nameof(Source.OutputFolder)}", Source.OutputFolder);
             Set($"AppSettings:{nameof(Source.SnapshotDelay)}", Source.SnapshotDelay.ToString());
+            Set($"AppSettings:{nameof(Source.SaveOriginal)}", Source.SaveOriginal.ToString());
+            Set($"AppSettings:{nameof(Source.IsVertical)}", Source.IsVertical.ToString());
         }
     }
 }

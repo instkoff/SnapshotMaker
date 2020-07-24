@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Linq;
 using System.Threading.Tasks;
-using CommandLine;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Serilog;
@@ -22,6 +19,7 @@ namespace SnapshotMaker
             {
                 Log.Information("Programm start..."); 
                 await CreateHostBuilder(args).RunConsoleAsync();
+
             }
             catch (Exception e)
             {
@@ -38,20 +36,7 @@ namespace SnapshotMaker
                 //получаем файл конфигурации
                 .ConfigureAppConfiguration((hostContext, builder) =>
                 {
-                    if (args.Any())
-                    {
-                        Parser.Default.ParseArguments<AppSettings>(args)
-                            .WithParsed(parsedSettings => builder.AddParsedCmdLineConfiguration(parsedSettings))
-                            .WithNotParsed((errors)=>
-                            {
-                                Environment.Exit(1);
-                            });
-                    }
-                    else
-                    {
-                        builder.AddJsonFile("appsettings.json", optional: true);
-                    }
-                    builder.AddJsonFile("logger_config.json", false);
+                    builder.AddSuitableConfiguration(args);
                 })
                 //настраиваем сервисы
                 .ConfigureServices((hostContext, services) =>

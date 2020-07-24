@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using Emgu.CV.CvEnum;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -10,34 +11,36 @@ namespace SnapshotMaker.BL.Models
     {
         private readonly IFrameClassifierService _frameClassifierService;
         private long _currentDuration;
+        private readonly long _durationInMsec;
 
         public FrameCapturerFromFile(ILogger<FrameCapturerModel> logger, IOptions<AppSettings> appSettings, IFrameClassifierService frameClassifierService)
             : base(logger, appSettings, frameClassifierService)
         {
             _frameClassifierService = frameClassifierService;
+            _durationInMsec = Settings.Duration * 1000;
         }
 
         protected override void CaptureFrames()
         {
-            Task.Run(TakeFramesFromCamera);
+            Task.Run(TakeFramesFromFile);
+            
         }
 
-        private void TakeFramesFromCamera()
+        private void TakeFramesFromFile()
         {
             _currentDuration = 0;
             NextFramePosition = Settings.StartPause;
-
             while (Capture.IsOpened)
             {
                 Capture.SetCaptureProperty(CapProp.PosMsec, NextFramePosition);
                 InputFrame = Capture.QueryFrame();
 
-                if (_currentDuration > Settings.Duration || InputFrame == null)
+                if (_currentDuration > _durationInMsec || InputFrame == null)
                 {
                     Capture.Dispose();
                     StreamOpened = false;
                     Logger.LogInformation("Stream stopped.");
-                    return;
+                    Environment.Exit(0);
                 }
 
                 _frameClassifierService.ClassifyFrame(InputFrame, NextFramePosition);
@@ -49,6 +52,7 @@ namespace SnapshotMaker.BL.Models
 
                 NextFramePosition += Settings.SnapshotDelay;
             }
+
         }
     }
 }

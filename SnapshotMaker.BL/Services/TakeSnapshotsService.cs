@@ -16,7 +16,7 @@ namespace SnapshotMaker.BL.Services
 
         public void StartTakeSnapshots()
         {
-            _frameCapturer.StartCaptureAsync();
+            _frameCapturer.StartCapture();
             _frameProcessor.StartProcessing();
         }
     }

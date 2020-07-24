@@ -31,23 +31,38 @@ namespace SnapshotMaker.BL.Services
 
         public void StartProcessing()
         {
-            if (_settings.IsVertical)
+            GetPointsOfInterest();
+
+            _frameClassifierService.OnFrameAdded += (frameQueue) =>
             {
-                _partPoints['B'] = new Point(430, 940);
-                _partPoints['M'] = new Point(920, 940);
-                _partPoints['T'] = new Point(1460, 940);
+                Task.Run(() => ProcessFrame(frameQueue));
+            };
+        }
+
+        private void GetPointsOfInterest()
+        {
+            if (_settings.IsVertical && !_settings.OneSnapshot)
+            {
+                _partPoints['B'] = new Point(500, 900);
+                _partPoints['M'] = new Point(1050, 900);
+                _partPoints['T'] = new Point(1600, 900);
             }
-            else
+
+            if (!_settings.IsVertical && !_settings.OneSnapshot)
             {
                 _partPoints['T'] = new Point(1225, 325);
                 _partPoints['M'] = new Point(1225, 921);
                 _partPoints['B'] = new Point(1225, 1500);
             }
 
-            _frameClassifierService.OnFrameAdded += (frameQueue) =>
+            if (_settings.IsVertical && _settings.OneSnapshot)
             {
-                Task.Run(() => ProcessFrame(frameQueue));
-            };
+                _partPoints['M'] = new Point(1050, 900);
+            }
+            if (!_settings.IsVertical && _settings.OneSnapshot)
+            {
+                _partPoints['M'] = new Point(1225, 921);
+            }
         }
 
         private void ProcessFrame(ConcurrentQueue<FrameInfo> frameQueue)
@@ -72,7 +87,7 @@ namespace SnapshotMaker.BL.Services
             var cvImage = frameInfo.Frame.ToImage<Bgr, byte>();
             var imgGray = cvImage.Convert<Gray, byte>().ThresholdBinary(new Gray(45), new Gray(255))
                 .Dilate(3).Erode(1);
-            imgGray.Save($"D:\\temp\\{frameInfo.FrameIndex}_temp_gray.jpg");
+            //imgGray.Save($"D:\\temp\\{frameInfo.FrameIndex}_temp_gray.jpg");
             var labels = new Mat();
             CvInvoke.ConnectedComponents(imgGray, labels);
             var cc = labels.ToImage<Gray, byte>();

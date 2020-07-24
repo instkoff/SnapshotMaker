@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using Emgu.CV;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -25,7 +26,7 @@ namespace SnapshotMaker.BL.Models
         }
 
 
-        public void StartCaptureAsync()
+        public void StartCapture()
         {
             OpenVideoSource();
             CaptureFrames();

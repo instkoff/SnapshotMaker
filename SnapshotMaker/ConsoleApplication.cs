@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Hosting;
 using SnapshotMaker.BL.Interfaces;
@@ -8,6 +9,7 @@ namespace SnapshotMaker
     public class ConsoleApplication : IHostedService
     {
         private readonly ITakeSnapshotService _takeSnapshotService;
+
 
         //Пробрасываем нужные зависимости
         public ConsoleApplication(ITakeSnapshotService takeSnapshotService)

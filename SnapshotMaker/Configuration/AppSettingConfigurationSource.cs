@@ -12,6 +12,7 @@ namespace SnapshotMaker.Configuration
         public long SnapshotDelay { get; set; }
         public bool SaveOriginal { get; set; }
         public bool IsVertical { get; set; }
+        public bool OneSnapshot { get; set; }
 
         public AppSettingConfigurationSource(AppSettings settings)
         {
@@ -22,6 +23,7 @@ namespace SnapshotMaker.Configuration
             SnapshotDelay = settings.SnapshotDelay;
             SaveOriginal = settings.SaveOriginal;
             IsVertical = settings.IsVertical;
+            OneSnapshot = settings.OneSnapshot;
         }
         public IConfigurationProvider Build(IConfigurationBuilder builder)
         {

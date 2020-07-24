@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using Emgu.CV;
 using Emgu.CV.Structure;
 
@@ -32,6 +33,10 @@ namespace SnapshotMaker.BL.Models
                 'O' => _frameNumber,
                 _ => 0
             };
+            if (_videoSourceName.Equals("main"))
+            {
+                _videoSourceName = DateTime.Now.ToString("dd_MM_yyyy HH_mm_ss");
+            }
             var snapshotName = ingotNumber + "_" + _label + "_" + _videoSourceName + ".jpg";
             var path = Path.Combine(outputFolder, snapshotName);
             _image.Save(path);

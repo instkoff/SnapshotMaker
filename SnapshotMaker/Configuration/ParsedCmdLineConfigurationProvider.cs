@@ -20,6 +20,7 @@ namespace SnapshotMaker.Configuration
             Set($"AppSettings:{nameof(Source.SnapshotDelay)}", Source.SnapshotDelay.ToString());
             Set($"AppSettings:{nameof(Source.SaveOriginal)}", Source.SaveOriginal.ToString());
             Set($"AppSettings:{nameof(Source.IsVertical)}", Source.IsVertical.ToString());
+            Set($"AppSettings:{nameof(Source.OneSnapshot)}", Source.OneSnapshot.ToString());
         }
     }
 }
